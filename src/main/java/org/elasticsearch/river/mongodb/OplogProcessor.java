@@ -3,6 +3,7 @@ package org.elasticsearch.river.mongodb;
 import org.bson.BasicBSONObject;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.ObjectId;
+import org.corespring.river.mongodb.VersionedIdHelper;
 import org.elasticsearch.common.base.CharMatcher;
 import org.elasticsearch.common.collect.ImmutableList;
 import org.elasticsearch.common.logging.ESLogger;
@@ -244,13 +245,13 @@ public class OplogProcessor {
         if (entry.containsField(MongoDBRiver.OPLOG_OBJECT)) {
             DBObject object = (DBObject) entry.get(MongoDBRiver.OPLOG_OBJECT);
             if (object.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
-                return object.get(MongoDBRiver.MONGODB_ID_FIELD).toString();
+                return VersionedIdHelper.versionedIdString(object.get(MongoDBRiver.MONGODB_ID_FIELD));
             }
         }
         if (entry.containsField(MongoDBRiver.OPLOG_UPDATE)) {
             DBObject object = (DBObject) entry.get(MongoDBRiver.OPLOG_UPDATE);
             if (object.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
-                return object.get(MongoDBRiver.MONGODB_ID_FIELD).toString();
+                return VersionedIdHelper.versionedIdString(object.get(MongoDBRiver.MONGODB_ID_FIELD));
             }
         }
         logger.trace("Oplog entry {}", entry);
