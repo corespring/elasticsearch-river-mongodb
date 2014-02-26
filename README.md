@@ -1,10 +1,17 @@
-MongoDB River Plugin for ElasticSearch
+MongoDB River Plugin (Corespring version) for ElasticSearch
 ==================================
 
 This plugin uses MongoDB as datasource to store data in ElasticSearch. Filtering and transformation are also possible. 
 See the [wiki](https://github.com/richardwilly98/elasticsearch-river-mongodb/wiki) for more details.
 
-In order to install the plugin, simply run: ```bin/plugin --install com.github.richardwilly98.elasticsearch/elasticsearch-river-mongodb/2.0.0```
+**Note**: This is a modified version of the
+[original plugin](https://github.com/richardwilly98/elasticsearch-river-mongodb) which supports Corespring's versioned
+MongoDB identifiers.
+
+In order to install the plugin locally, run: ```./install-local.sh```
+
+TODO: Write installation description to pull from Github.
+
 
 | MongoDB River Plugin     | ElasticSearch    | MongoDB |
 |--------------------------|------------------|---------|
@@ -31,10 +38,6 @@ In order to install the plugin, simply run: ```bin/plugin --install com.github.r
 | 1.1.0                    | 0.19.0           | 2.0.2   |
 | 1.0.0                    | 0.18             |         |
 
-Build status
--------
-
-[![Build Status](https://drone.io/github.com/richardwilly98/elasticsearch-river-mongodb/status.png)](https://drone.io/github.com/richardwilly98/elasticsearch-river-mongodb/latest)
 
 Initial implementation by [aparo](https://github.com/aparo). For the initial implementation see [tutorial](http://www.matt-reid.co.uk/blog_post.php?id=68#&slider1=4).
 
