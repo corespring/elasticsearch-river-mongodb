@@ -1,7 +1,0 @@
-{
-	"book": {
-		"_parent": {
-			"type": "author"
-		}
-	}
-}
