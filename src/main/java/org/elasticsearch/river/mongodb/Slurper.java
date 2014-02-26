@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.bson.BasicBSONObject;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.ObjectId;
+import org.corespring.river.mongodb.VersionedIdHelper;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.base.CharMatcher;
 import org.elasticsearch.common.collect.ImmutableList;
@@ -226,6 +227,7 @@ class Slurper implements Runnable {
                     while (cursor.hasNext()) {
                         DBObject object = cursor.next();
                         if (object instanceof GridFSDBFile) {
+                            // This could be problematic for Corespring if we use Grid FS.
                             GridFSDBFile file = grid.findOne(new ObjectId(object.get(MongoDBRiver.MONGODB_ID_FIELD).toString()));
                             if (cursor.hasNext()) {
                                 lastId = addInsertToStream(null, file);
@@ -238,8 +240,10 @@ class Slurper implements Runnable {
                     inProgress = false;
                 }
             } catch (MongoException.CursorNotFound e) {
-                logger.info("Initial import - Cursor {} has been closed. About to open a new cusor.", cursor.getCursorId());
+                logger.info("Initial import - Cursor {} has been closed. About to open a new cursor.", cursor.getCursorId());
                 logger.debug("Total document inserted [{}]", totalDocuments.get());
+            } catch (Exception e) {
+              e.printStackTrace();
             } finally {
                 if (cursor != null) {
                     logger.trace("Closing initial import cursor");
@@ -257,7 +261,7 @@ class Slurper implements Runnable {
         if (id == null) {
             return filter;
         } else {
-            BasicDBObject filterId = new BasicDBObject(MongoDBRiver.MONGODB_ID_FIELD, new BasicBSONObject(QueryOperators.GT, id));
+            BasicDBObject filterId = VersionedIdHelper.gtQuery(id);
             if (filter == null) {
                 return filterId;
             } else {
@@ -561,13 +565,13 @@ class Slurper implements Runnable {
         if (entry.containsField(MongoDBRiver.OPLOG_OBJECT)) {
             DBObject object = (DBObject) entry.get(MongoDBRiver.OPLOG_OBJECT);
             if (object.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
-                return object.get(MongoDBRiver.MONGODB_ID_FIELD).toString();
+                return VersionedIdHelper.versionedIdString(object.get(MongoDBRiver.MONGODB_ID_FIELD));
             }
         }
         if (entry.containsField(MongoDBRiver.OPLOG_UPDATE)) {
             DBObject object = (DBObject) entry.get(MongoDBRiver.OPLOG_UPDATE);
             if (object.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
-                return object.get(MongoDBRiver.MONGODB_ID_FIELD).toString();
+                return VersionedIdHelper.versionedIdString(object.get(MongoDBRiver.MONGODB_ID_FIELD));
             }
         }
         return null;
@@ -648,7 +652,7 @@ class Slurper implements Runnable {
             throws InterruptedException {
         totalDocuments.incrementAndGet();
         addToStream(Operation.INSERT, currentTimestamp, data, collection);
-        return data.containsField(MongoDBRiver.MONGODB_ID_FIELD) ? data.get(MongoDBRiver.MONGODB_ID_FIELD).toString() : null;
+        return data.containsField(MongoDBRiver.MONGODB_ID_FIELD) ? VersionedIdHelper.versionedIdString(data.get(MongoDBRiver.MONGODB_ID_FIELD)) : null;
     }
 
     private void addToStream(final Operation operation, final BSONTimestamp currentTimestamp, final DBObject data, final String collection)

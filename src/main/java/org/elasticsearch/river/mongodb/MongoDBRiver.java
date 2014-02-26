@@ -30,6 +30,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.bson.types.BSONTimestamp;
+import org.corespring.river.mongodb.VersionedIdHelper;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -213,7 +214,7 @@ public class MongoDBRiver extends AbstractRiverComponent implements River {
                         logger.debug("shards: {}", item.toString());
                         List<ServerAddress> servers = getServerAddressForReplica(item);
                         if (servers != null) {
-                            String replicaName = item.get(MONGODB_ID_FIELD).toString();
+                            String replicaName = VersionedIdHelper.versionedIdString(item.get(MONGODB_ID_FIELD));
                             Thread tailerThread = EsExecutors.daemonThreadFactory(settings.globalSettings(),
                                     "mongodb_river_slurper_" + replicaName).newThread(new Slurper(servers, definition, context, client));
                             tailerThreads.add(tailerThread);

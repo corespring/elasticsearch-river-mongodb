@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.bson.types.BSONTimestamp;
 import org.bson.types.BasicBSONList;
+import org.corespring.river.mongodb.VersionedIdHelper;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.ImmutableMap;
@@ -131,7 +132,7 @@ class Indexer implements Runnable {
 
         String objectId = "";
         if (entry.getData().get(MongoDBRiver.MONGODB_ID_FIELD) != null) {
-            objectId = entry.getData().get(MongoDBRiver.MONGODB_ID_FIELD).toString();
+            objectId = VersionedIdHelper.versionedIdString(entry.getData().get(MongoDBRiver.MONGODB_ID_FIELD));
         }
 
         // TODO: Should the river support script filter,
@@ -294,7 +295,7 @@ class Indexer implements Runnable {
         Operation operation = entry.getOperation();
         String objectId = "";
         if (entry.getData().get(MongoDBRiver.MONGODB_ID_FIELD) != null) {
-            objectId = entry.getData().get(MongoDBRiver.MONGODB_ID_FIELD).toString();
+            objectId = VersionedIdHelper.versionedIdString(entry.getData().get(MongoDBRiver.MONGODB_ID_FIELD));
         }
         if (logger.isDebugEnabled()) {
             logger.debug("applyAdvancedTransformation for id: [{}], operation: [{}]", objectId, operation);
@@ -443,11 +444,11 @@ class Indexer implements Runnable {
     private String extractObjectId(Map<String, Object> ctx, String objectId) {
         Object id = ctx.get("id");
         if (id != null) {
-            return id.toString();
+            return VersionedIdHelper.versionedIdString(id);
         }
         id = ctx.get(MongoDBRiver.MONGODB_ID_FIELD);
         if (id != null) {
-            return id.toString();
+            return VersionedIdHelper.versionedIdString(id);
         } else {
             return objectId;
         }
