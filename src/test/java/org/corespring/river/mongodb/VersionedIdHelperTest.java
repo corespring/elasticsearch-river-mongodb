@@ -23,12 +23,12 @@ public class VersionedIdHelperTest {
     BigDecimal version = new BigDecimal((new Random()).nextInt(9));
 
     DBObject versionedId = new BasicDBObject();
-    versionedId.put(MongoDBRiver.MONGODB_ID_FIELD, objectId.toString());
+    versionedId.put(MongoDBRiver.MONGODB_ID_FIELD, objectId);
     versionedId.put(VersionedIdHelper.MONGODB_VERSION_FIELD, version);
 
     String id = VersionedIdHelper.versionedIdString(versionedId);
 
-    Assert.assertEquals(id, objectId.toString() + ":" + version.toString());
+    Assert.assertEquals(id, objectId.toString());
   }
 
   public void testVersionedIdStringWithIntegerReturnsCorrectString() {
@@ -36,12 +36,12 @@ public class VersionedIdHelperTest {
     Integer version = (new Random()).nextInt(9);
 
     DBObject versionedId = new BasicDBObject();
-    versionedId.put(MongoDBRiver.MONGODB_ID_FIELD, objectId.toString());
+    versionedId.put(MongoDBRiver.MONGODB_ID_FIELD, objectId);
     versionedId.put(VersionedIdHelper.MONGODB_VERSION_FIELD, version);
 
     String id = VersionedIdHelper.versionedIdString(versionedId);
 
-    Assert.assertEquals(id, objectId.toString() + ":" + version.toString());
+    Assert.assertEquals(id, objectId.toString());
   }
 
   public void testGetIdWithVersionedId() {

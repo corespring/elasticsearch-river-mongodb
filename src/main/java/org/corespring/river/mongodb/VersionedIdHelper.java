@@ -1,6 +1,5 @@
 package org.corespring.river.mongodb;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.QueryOperators;
@@ -79,13 +78,12 @@ public class VersionedIdHelper {
    *   }
    * </pre>
    *
-   * This method will convert it to the String representation "530dfcce18a78ca06c0c1ff6:0". If the object does not have
-   * the appropriate "_id" and "version" fields, an {@link IllegalArgumentException} will be thrown.
+   * This method will convert it to the String representation "530dfcce18a78ca06c0c1ff6". If the object does not have
+   * the appropriate "_id" field, an {@link IllegalArgumentException} will be thrown.
    */
   private static String getVersionedId(DBObject dbObject) {
-    String objectId = getFromBSON(dbObject, MongoDBRiver.MONGODB_ID_FIELD, String.class);
-    String version = getFromBSON(dbObject, MONGODB_VERSION_FIELD);
-    return objectId.toString() + ":" + version.toString();
+    String objectId = getFromBSON(dbObject, MongoDBRiver.MONGODB_ID_FIELD, ObjectId.class).toString();
+    return objectId.toString();
   }
 
   /**
@@ -99,18 +97,6 @@ public class VersionedIdHelper {
       } catch (ClassCastException e) {
         throw new IllegalArgumentException("Field " + field + " did not match type " + clazz.toString());
       }
-    } else {
-      throw new IllegalArgumentException("DBObject is missing field " + field);
-    }
-  }
-
-  /**
-   * Get the {@link String} representation of the provided field in the {@link DBObject}. If not present, throws
-   * {@link IllegalArgumentException}.
-   */
-  private static String getFromBSON(DBObject dbObject, String field) {
-    if (dbObject.containsField(field)) {
-      return dbObject.get(field).toString();
     } else {
       throw new IllegalArgumentException("DBObject is missing field " + field);
     }

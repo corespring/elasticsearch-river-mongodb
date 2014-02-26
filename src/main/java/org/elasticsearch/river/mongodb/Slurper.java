@@ -240,8 +240,10 @@ class Slurper implements Runnable {
                     inProgress = false;
                 }
             } catch (MongoException.CursorNotFound e) {
-                logger.info("Initial import - Cursor {} has been closed. About to open a new cusor.", cursor.getCursorId());
+                logger.info("Initial import - Cursor {} has been closed. About to open a new cursor.", cursor.getCursorId());
                 logger.debug("Total document inserted [{}]", totalDocuments.get());
+            } catch (Exception e) {
+              e.printStackTrace();
             } finally {
                 if (cursor != null) {
                     logger.trace("Closing initial import cursor");
