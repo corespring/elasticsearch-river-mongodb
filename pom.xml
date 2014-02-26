@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.richardwilly98.elasticsearch</groupId>
 	<artifactId>elasticsearch-river-mongodb</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<description>MongoDB River for ElasticSearch</description>
-	<url>https://github.com/richardwilly98/elasticsearch-river-mongodb</url>
+	<url>https://github.com/corespring/elasticsearch-river-mongodb</url>
 	<inceptionYear>2010</inceptionYear>
 
 	<licenses>
@@ -18,13 +18,13 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/richardwilly98/elasticsearch-river-mongodb</url>
-		<connection>scm:git:git@github.com:richardwilly98/elasticsearch-river-mongodb.git</connection>
-		<developerConnection>scm:git:git@github.com:richardwilly98/elasticsearch-river-mongodb.git</developerConnection>
+		<url>https://github.com/corespring/elasticsearch-river-mongodb</url>
+		<connection>scm:git:git@github.com:corespring/elasticsearch-river-mongodb.git</connection>
+		<developerConnection>scm:git:git@github.com:corespring/elasticsearch-river-mongodb.git</developerConnection>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/richardwilly98/elasticsearch-river-mongodb/issues</url>
+		<url>https://github.com/corespring/elasticsearch-river-mongodb/issues</url>
 	</issueManagement>
 
 	<developers>
@@ -34,6 +34,12 @@
 			<url>https://github.com/richardwilly98</url>
 			<id>richardwilly98</id>
 		</developer>
+        <developer>
+            <email>ben@corespring.org</email>
+            <name>Ben Burton</name>
+            <url>https://github.com/benburton</url>
+            <id>benburton</id>
+        </developer>
 	</developers>
 
 	<parent>
