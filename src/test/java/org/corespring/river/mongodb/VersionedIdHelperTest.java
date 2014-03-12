@@ -60,14 +60,14 @@ public class VersionedIdHelperTest {
 
   public void testUnversionId() throws InterruptedException {
     ObjectId objectId = new ObjectId();
-    BSONObject id = new BasicDBObject();
+    DBObject id = new BasicDBObject();
     id.put(MongoDBRiver.MONGODB_ID_FIELD, objectId);
     id.put(VersionedIdHelper.MONGODB_VERSION_FIELD, 0);
 
-    BSONObject data = new BasicDBObject();
+    DBObject data = new BasicDBObject();
     data.put(MongoDBRiver.MONGODB_ID_FIELD, id);
 
-    BSONObject result = VersionedIdHelper.unversionId(data);
+    DBObject result = VersionedIdHelper.unversionId(data);
     Object resultId = result.get(MongoDBRiver.MONGODB_ID_FIELD);
 
     Assert.assertEquals(resultId, objectId);

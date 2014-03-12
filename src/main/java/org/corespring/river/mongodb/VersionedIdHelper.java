@@ -88,11 +88,11 @@ public class VersionedIdHelper {
   /**
    * Rewrites the id field of a {@link BSONObject} to be non-versioned.
    */
-  public static BSONObject unversionId(BSONObject bsonObject) {
-    if (bsonObject.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
-      bsonObject.put(MongoDBRiver.MONGODB_ID_FIELD, getId(bsonObject.get(MongoDBRiver.MONGODB_ID_FIELD)));
+  public static DBObject unversionId(DBObject dbObject) {
+    if (dbObject.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
+      dbObject.put(MongoDBRiver.MONGODB_ID_FIELD, getId(dbObject.get(MongoDBRiver.MONGODB_ID_FIELD)));
     }
-    return bsonObject;
+    return dbObject;
   }
 
   /**
