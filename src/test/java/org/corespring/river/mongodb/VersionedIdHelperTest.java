@@ -2,6 +2,8 @@ package org.corespring.river.mongodb;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 import org.bson.types.ObjectId;
 import org.elasticsearch.river.mongodb.MongoDBRiver;
 import org.testng.Assert;
@@ -54,6 +56,21 @@ public class VersionedIdHelperTest {
   public void testGetIdWithUnversionedId() {
     ObjectId objectId = new ObjectId();
     Assert.assertEquals(VersionedIdHelper.getId(objectId), objectId);
+  }
+
+  public void testUnversionId() throws InterruptedException {
+    ObjectId objectId = new ObjectId();
+    DBObject id = new BasicDBObject();
+    id.put(MongoDBRiver.MONGODB_ID_FIELD, objectId);
+    id.put(VersionedIdHelper.MONGODB_VERSION_FIELD, 0);
+
+    DBObject data = new BasicDBObject();
+    data.put(MongoDBRiver.MONGODB_ID_FIELD, id);
+
+    DBObject result = VersionedIdHelper.unversionId(data);
+    Object resultId = result.get(MongoDBRiver.MONGODB_ID_FIELD);
+
+    Assert.assertEquals(resultId, objectId);
   }
 
 }

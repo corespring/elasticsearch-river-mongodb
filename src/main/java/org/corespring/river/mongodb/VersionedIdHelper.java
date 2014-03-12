@@ -3,6 +3,7 @@ package org.corespring.river.mongodb;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.QueryOperators;
+import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 import org.bson.types.ObjectId;
 import org.elasticsearch.river.mongodb.MongoDBRiver;
@@ -54,11 +55,27 @@ public class VersionedIdHelper {
       }
     } else if (id instanceof ObjectId) {
       return (ObjectId) id;
+    } else if (id instanceof BSONObject) {
+      BSONObject bsonObject = (BSONObject) id;
+      if (bsonObject.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
+        if (bsonObject.get(MongoDBRiver.MONGODB_ID_FIELD) instanceof ObjectId) {
+          return (ObjectId) bsonObject.get(MongoDBRiver.MONGODB_ID_FIELD);
+        } else {
+          throw new IllegalArgumentException(
+            "Object of type " + id.getClass() + "did not have " + MongoDBRiver.MONGODB_ID_FIELD + "of type " + ObjectId.class.toString());
+        }
+      } else {
+        throw new IllegalArgumentException(
+          "Object of type " + id.getClass() + " missing field " + MongoDBRiver.MONGODB_ID_FIELD);
+      }
     } else {
       throw new IllegalArgumentException("Object of type " + id.getClass() + " cannot be converted to ObjectId");
     }
   }
 
+  /**
+   * Creates a greater-than query for looking for at versioned ids.
+   */
   public static BasicDBObject gtQuery(String id) {
     List<BasicDBObject> conditions = new ArrayList<BasicDBObject>(2);
 
@@ -66,6 +83,16 @@ public class VersionedIdHelper {
     conditions.add(new BasicDBObject(MONGODB_VERSIONED_VERSION_FIELD, new BasicBSONObject(QueryOperators.GT, id)));
 
     return new BasicDBObject(QueryOperators.OR, conditions);
+  }
+
+  /**
+   * Rewrites the id field of a {@link BSONObject} to be non-versioned.
+   */
+  public static DBObject unversionId(DBObject dbObject) {
+    if (dbObject.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
+      dbObject.put(MongoDBRiver.MONGODB_ID_FIELD, getId(dbObject.get(MongoDBRiver.MONGODB_ID_FIELD)));
+    }
+    return dbObject;
   }
 
   /**
