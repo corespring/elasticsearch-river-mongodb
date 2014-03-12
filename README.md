@@ -8,9 +8,11 @@ See the [wiki](https://github.com/richardwilly98/elasticsearch-river-mongodb/wik
 [original plugin](https://github.com/richardwilly98/elasticsearch-river-mongodb) which supports Corespring's versioned
 MongoDB identifiers.
 
-In order to install the plugin locally, run: ```./install-local.sh```
+In order to install the plugin from local source, run: ```./install-local.sh```
 
-TODO: Write installation description to pull from Github.
+In order to install the latest version of the plugin, run:
+
+    sudo plugin --url "https://github.com/corespring/elasticsearch-river-mongodb/raw/releases/bin/elasticsearch-river-mongodb-corespring-2.0.0.zip" --install elasticsearch-river-mongodb
 
 
 | MongoDB River Plugin     | ElasticSearch    | MongoDB |

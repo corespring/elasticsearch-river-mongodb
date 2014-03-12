@@ -655,8 +655,9 @@ class Slurper implements Runnable {
         return data.containsField(MongoDBRiver.MONGODB_ID_FIELD) ? VersionedIdHelper.versionedIdString(data.get(MongoDBRiver.MONGODB_ID_FIELD)) : null;
     }
 
-    private void addToStream(final Operation operation, final BSONTimestamp currentTimestamp, final DBObject data, final String collection)
+    private void addToStream(final Operation operation, final BSONTimestamp currentTimestamp, DBObject data, final String collection)
             throws InterruptedException {
+        data = VersionedIdHelper.unversionId(data);
         if (logger.isTraceEnabled()) {
             logger.trace("addToStream - operation [{}], currentTimestamp [{}], data [{}], collection [{}]", operation, currentTimestamp,
                     data, collection);
