@@ -6,6 +6,8 @@ import com.mongodb.QueryOperators;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 import org.bson.types.ObjectId;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.river.mongodb.MongoDBRiver;
 
 import java.util.ArrayList;
@@ -16,6 +18,8 @@ import java.util.List;
  * A utility class to convert {@link Object}s to/from  Corespring versioned id {@link String}s.
  */
 public class VersionedIdHelper {
+
+  private static final ESLogger logger = ESLoggerFactory.getLogger(VersionedIdHelper.class.getName());
 
   /** Field in a {@link DBObject} representing the versioned id **/
   static final String MONGODB_VERSION_FIELD = "version";
@@ -90,9 +94,25 @@ public class VersionedIdHelper {
    */
   public static DBObject unversionId(DBObject dbObject) {
     if (dbObject.containsField(MongoDBRiver.MONGODB_ID_FIELD)) {
-      dbObject.put(MongoDBRiver.MONGODB_ID_FIELD, getId(dbObject.get(MongoDBRiver.MONGODB_ID_FIELD)));
+      try {
+        dbObject.put(MONGODB_VERSION_FIELD, getVersion(dbObject));
+        dbObject.put(MongoDBRiver.MONGODB_ID_FIELD, getId(dbObject.get(MongoDBRiver.MONGODB_ID_FIELD)));
+      } catch (Exception e) {
+        logger.error("Error", e);
+      }
     }
     return dbObject;
+  }
+
+  private static Object getVersion(DBObject dbObject) throws Exception {
+    if (dbObject.containsField(MONGODB_VERSION_FIELD)) {
+      return getFromBSON(dbObject, MONGODB_VERSION_FIELD);
+    } else if (dbObject.containsField(MongoDBRiver.MONGODB_ID_FIELD) &&
+      dbObject.get(MongoDBRiver.MONGODB_ID_FIELD) instanceof DBObject) {
+      return getVersion(getFromBSON(dbObject, MongoDBRiver.MONGODB_ID_FIELD, DBObject.class));
+    } else {
+      return 0;
+    }
   }
 
   /**
@@ -113,6 +133,10 @@ public class VersionedIdHelper {
     return objectId.toString();
   }
 
+  private static Object getFromBSON(DBObject dbObject, String field) {
+    return getFromBSON(dbObject, field, Object.class);
+  }
+
   /**
    * Takes a {@link DBObject}, looks for a particular field, attempts to cast it to the provided {@link Class} and
    * return. If any of that fails, it throws {@link IllegalArgumentException}s.
@@ -122,7 +146,8 @@ public class VersionedIdHelper {
       try {
         return clazz.cast(dbObject.get(field));
       } catch (ClassCastException e) {
-        throw new IllegalArgumentException("Field " + field + " did not match type " + clazz.toString());
+        throw new IllegalArgumentException("Field " + field + " did not match type " + clazz.toString() +
+          ", matched " + dbObject.get(field).getClass());
       }
     } else {
       throw new IllegalArgumentException("DBObject is missing field " + field);

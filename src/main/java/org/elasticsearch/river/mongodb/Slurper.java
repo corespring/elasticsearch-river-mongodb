@@ -309,32 +309,6 @@ class Slurper implements Runnable {
         if (!definition.getMongoAdminUser().isEmpty() && !definition.getMongoAdminPassword().isEmpty() && adminDb.isAuthenticated()) {
             slurpedDb = adminDb.getMongo().getDB(definition.getMongoDb());
         }
-
-        // Not necessary as local user has access to all databases.
-        // http://docs.mongodb.org/manual/reference/local-database/
-        // if (!mongoDbUser.isEmpty() && !mongoDbPassword.isEmpty()
-        // && !slurpedDb.isAuthenticated()) {
-        // logger.info("Authenticate {} with {}", mongoDb, mongoDbUser);
-        // CommandResult cmd = slurpedDb.authenticateCommand(mongoDbUser,
-        // mongoDbPassword.toCharArray());
-        // if (!cmd.ok()) {
-        // logger.error("Authentication failed for {}: {}",
-        // mongoDb, cmd.getErrorMessage());
-        // return false;
-        // }
-        // }
-        // slurpedCollection =
-        // slurpedDb.getCollection(definition.getMongoCollection());
-        // if (definition.isImportAllCollections()) {
-        // for (String collection : slurpedDb.getCollectionNames()) {
-        // slurpedCollections.put(collection,
-        // slurpedDb.getCollection(collection));
-        // }
-        // } else {
-        // slurpedCollections.put(definition.getMongoCollection(),
-        // slurpedDb.getCollection(definition.getMongoCollection()));
-        // }
-
         return true;
     }
 
