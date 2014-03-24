@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.bson.BasicBSONObject;
 import org.bson.types.BSONTimestamp;
 import org.bson.types.ObjectId;
+import org.corespring.river.mongodb.StandardsConverter;
 import org.corespring.river.mongodb.VersionedIdHelper;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.base.CharMatcher;
@@ -64,6 +65,7 @@ class Slurper implements Runnable {
     private DB oplogDb;
     private DBCollection oplogCollection;
     private final AtomicLong totalDocuments = new AtomicLong();
+    private final StandardsConverter standardsConverter;
 
     public Slurper(List<ServerAddress> mongoServers, MongoDBRiverDefinition definition, SharedContext context, Client client) {
         this.definition = definition;
@@ -73,6 +75,7 @@ class Slurper implements Runnable {
         this.findKeys = new BasicDBObject();
         this.gridfsOplogNamespace = definition.getMongoOplogNamespace() + MongoDBRiver.GRIDFS_FILES_SUFFIX;
         this.cmdOplogNamespace = definition.getMongoDb() + "." + MongoDBRiver.OPLOG_NAMESPACE_COMMAND;
+        this.standardsConverter = new StandardsConverter(mongo, definition);
         if (definition.getExcludeFields() != null) {
             for (String key : definition.getExcludeFields()) {
                 findKeys.put(key, 0);
@@ -631,7 +634,8 @@ class Slurper implements Runnable {
 
     private void addToStream(final Operation operation, final BSONTimestamp currentTimestamp, DBObject data, final String collection)
             throws InterruptedException {
-        data = VersionedIdHelper.unversionId(data);
+        data = standardsConverter.addStandardData(VersionedIdHelper.unversionId(data));
+
         if (logger.isTraceEnabled()) {
             logger.trace("addToStream - operation [{}], currentTimestamp [{}], data [{}], collection [{}]", operation, currentTimestamp,
                     data, collection);
