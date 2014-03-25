@@ -1,9 +1,8 @@
 package org.corespring.river.mongodb;
 
 import com.mongodb.*;
-import org.elasticsearch.river.mongodb.MongoDBRiverDefinition;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -11,61 +10,27 @@ import java.util.Map;
  * This class is designed to take an existing content object with a standard attribute representing an array of
  * dot notations for standards, and replace that array with objects containing the matching standard's metadata. See
  * the {@link #addStandardData(com.mongodb.DBObject)} method for more information.
+ *
+ * Why do this over using a separate index for the standards and referencing that? It turns out that Elasticsearch is
+ * (at the time of this writing) not especially good at handling parent/child, many-to-many relationships. The
+ * researched solutions involve making queries to both indexes and then piecing the data back together manually. The
+ * following seemed like a more elegant solution, being that the standards data is relatively small in size, and
+ * more-or-less static.
  */
 public class StandardsConverter {
-
-  public class StandardKeys {
-    public static final String CATEGORY = "category";
-    public static final String DOT_NOTATION = "dotNotation";
-    public static final String STANDARD = "standard";
-    public static final String SUBCATEGORY = "subCategory";
-  }
 
   public class ContentKeys {
     public static final String STANDARDS = "standards";
   }
 
-  private static final String STANDARDS_COLLECTION = "ccstandards";
-
   // Fields to include in the resultant data conversion.
   private static final String[] STANDARD_FIELDS =
-    { StandardKeys.CATEGORY, StandardKeys.DOT_NOTATION, StandardKeys.STANDARD, StandardKeys.SUBCATEGORY };
+    { Standard.Keys.CATEGORY, Standard.Keys.DOT_NOTATION, Standard.Keys.STANDARD, Standard.Keys.SUBCATEGORY };
 
-  // Mapping of standards by their dot-notation
-  private final Map<String, DBObject> standards;
+  private final Collection<Map> standards;
 
-  public StandardsConverter(Mongo mongoClient, MongoDBRiverDefinition definition) {
-    DBCollection standardsCollection = mongoClient.getDB(definition.getMongoDb()).getCollection(STANDARDS_COLLECTION);
-    this.standards = getStandards(standardsCollection);
-  }
-
-  private Map<String, DBObject> getStandards(DBCollection standardsCollection) {
-    Map<String, DBObject> standards = new HashMap<String, DBObject>();
-    for (Iterator<DBObject> iterator = standardsCollection.find().iterator(); iterator.hasNext();) {
-      DBObject object = iterator.next();
-      standards.put(object.get(StandardKeys.DOT_NOTATION).toString(), filterStandard(object));
-    }
-    return standards;
-  }
-
-  /**
-   * Returns a version of the provided {@link DBObject} with only STANDARD_FIELDS' fields.
-   */
-  private DBObject filterStandard(DBObject standard) {
-    DBObject object = new BasicDBObject();
-    for (String field : STANDARD_FIELDS) {
-      addIfExists(field, standard, object);
-    }
-    return object;
-  }
-
-  /**
-   * Adds the field from source to target if present.
-   */
-  private void addIfExists(String field, DBObject source, DBObject target) {
-    if (source.containsField(field)) {
-      target.put(field, source.get(field));
-    }
+  public StandardsConverter(StandardsDAO standardsDAO) {
+    this.standards = standardsDAO.getStandards();
   }
 
   /**
@@ -111,8 +76,9 @@ public class StandardsConverter {
         Object obj = iterator.next();
         if (obj instanceof String) {
           String dotNotation = (String) obj;
-          if (this.standards.containsKey(dotNotation)) {
-            newStandards.add(this.standards.get(dotNotation));
+          Map standard = getStandardByDotNotation(dotNotation);
+          if (standard != null) {
+            newStandards.add(filterStandard(standard));
           }
         }
       }
@@ -124,5 +90,38 @@ public class StandardsConverter {
     return source;
   }
 
+  /**
+   * Returns a standard with the provided dot notation, null if not present.
+   */
+  private Map getStandardByDotNotation(String dotNotation) {
+    for (Map standard : standards) {
+      if (standard.containsKey(Standard.Keys.DOT_NOTATION) &&
+        standard.get(Standard.Keys.DOT_NOTATION).equals(dotNotation)) {
+        return standard;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Returns a version of the provided {@link DBObject} with only STANDARD_FIELDS' fields.
+   */
+  private DBObject filterStandard(Map standard) {
+    DBObject object = new BasicDBObject();
+    for (String field : STANDARD_FIELDS) {
+      addIfExists(field, standard, object);
+    }
+    return object;
+  }
+
+
+  /**
+   * Adds the field from source to target if present.
+   */
+  private void addIfExists(String field, Map source, DBObject target) {
+    if (source.containsKey(field)) {
+      target.put(field, source.get(field));
+    }
+  }
 
 }
